@@ -1,4 +1,17 @@
-const UNSAFE_KEYWORDS = ['adult', 'xxx', 'porn', 'explicit', 'nsfw', 'sex'];
+const SCORES = {
+  "porn": 10, "porno": 10, "pornography": 10, "xxx": 10, "adult": 10, "nsfw": 8, "explicit": 8, "sex": 10, "sexual": 8, "nude": 8, "nudity": 8, "naked": 8, "erotic": 8, "fetish": 8,
+  "hardcore": 10, "softcore": 10, "camgirl": 10, "cams": 10, "webcam sex": 10, "live sex": 10, "escort": 10, "hookup": 8, "onlyfans": 10, "strip": 5, "striptease": 8, "lingerie": 5, "bdsm": 10, "kinky": 8, "milf": 10, "hentai": 10,
+  "sex video": 10, "adult video": 10, "hot video": 5, "xxx video": 10, "watch porn": 10, "free porn": 10, "hd porn": 10, "live cam": 8,
+  "casual sex": 10, "one night stand": 8, "dirty chat": 8, "sexting": 10, "naughty": 5, "horny": 8, "seduction": 5,
+  "redtube": 10, "pornhub": 10, "xvideos": 10, "xnxx": 10, "youporn": 10, "brazzers": 10,
+  "p0rn": 10, "pr0n": 10, "s3x": 10, "n4ked": 10, "h0t girls": 8,
+  "watch adult": 10, "watch sexvideo": 10, "free sexvideo": 10, "best porn site": 10, "adult streaming": 10,
+  "anal": 10, "blowjob": 10, "deepthroat": 10, "cumshot": 10, "gangbang": 10, "masturbation": 10, "orgasm": 10, "threesome": 10,
+  "nsfw ai": 8, "ai girlfriend": 8, "uncensored ai": 10, "adult ai": 10,
+  "casino": 8, "betting": 8, "gambling": 8,
+  "cocaine": 10, "weed": 5, "meth": 10, "drug dealer": 10
+};
+const ESCAPED_KEYWORDS = Object.keys(SCORES).map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
 let isEnabled = true;
 let strictMode = true;
 let scanInterval;
@@ -51,25 +64,45 @@ function runScanner() {
 function scanAndProtect() {
     if (!isEnabled || !document.body) return;
 
-    // Fast text scanning
-    const bodyText = document.body.textContent.toLowerCase();
-    let matchCount = 0;
-    
-    for (const keyword of UNSAFE_KEYWORDS) {
-        // Use word boundary to prevent matching substrings
-        const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
-        const matches = bodyText.match(regex);
+    // Safe text scanning - ignoring hidden scripts/styles
+    let totalScore = 0;
+    const regex = new RegExp(`\\b(${ESCAPED_KEYWORDS.join('|')})\\b`, 'gi');
+
+    const walker = document.createTreeWalker(
+        document.body,
+        NodeFilter.SHOW_TEXT,
+        {
+            acceptNode: function(node) {
+                const parent = node.parentNode;
+                if (!parent) return NodeFilter.FILTER_REJECT;
+                const parentName = parent.nodeName.toLowerCase();
+                // Ignore code elements to prevent false positives (like 'favicon_xxx.png' inside a script)
+                if (parentName === 'script' || parentName === 'style' || parentName === 'noscript') {
+                    return NodeFilter.FILTER_REJECT;
+                }
+                return NodeFilter.FILTER_ACCEPT;
+            }
+        }
+    );
+
+    let node;
+    while ((node = walker.nextNode())) {
+        const text = node.nodeValue;
+        const matches = text.match(regex);
         if (matches) {
-            matchCount += matches.length;
+            matches.forEach(match => {
+                const lowerMatch = match.toLowerCase();
+                totalScore += SCORES[lowerMatch] || 0;
+            });
         }
     }
 
-    if (strictMode && matchCount > 0) {
+    if (strictMode && totalScore > 0) {
         blurKeywordsInDOM();
     }
 
-    if (matchCount >= 5) { // Threshold for unsafe content
-        console.log("SafeSurf AI: Unsafe content detected!");
+    if (totalScore >= 20) { // Threshold for unsafe content (e.g. score >= 20 means very unsafe)
+        console.log("SafeSurf AI: Unsafe content detected! Score:", totalScore);
         if (strictMode) {
             blurImages();
         }
@@ -186,7 +219,7 @@ function blurKeywordsInDOM() {
         document.head.appendChild(style);
     }
 
-    const regex = new RegExp(`\\b(${UNSAFE_KEYWORDS.join('|')})\\b`, 'gi');
+    const regex = new RegExp(`\\b(${ESCAPED_KEYWORDS.join('|')})\\b`, 'gi');
 
     const walker = document.createTreeWalker(
         document.body,
