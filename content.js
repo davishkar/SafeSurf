@@ -2,6 +2,7 @@ const UNSAFE_KEYWORDS = ['adult', 'xxx', 'porn', 'explicit', 'nsfw', 'sex'];
 let isEnabled = true;
 let strictMode = true;
 let scanInterval;
+let bodyObserver = null;
 
 chrome.storage.local.get(['isEnabled', 'strictMode'], (result) => {
     isEnabled = result.isEnabled ?? true;
@@ -33,21 +34,25 @@ function runScanner() {
     // Scan immediately
     scanAndProtect();
     
+    if (bodyObserver) {
+        bodyObserver.disconnect();
+    }
+    
     // Also observe DOM changes for single-page apps
-    const observer = new MutationObserver(() => {
+    bodyObserver = new MutationObserver(() => {
         // Debounce scan
         clearTimeout(scanInterval);
         scanInterval = setTimeout(() => scanAndProtect(), 150);
     });
     
-    observer.observe(document.body, { childList: true, subtree: true });
+    bodyObserver.observe(document.body, { childList: true, subtree: true });
 }
 
 function scanAndProtect() {
     if (!isEnabled || !document.body) return;
 
     // Fast text scanning
-    const bodyText = document.body.innerText.toLowerCase();
+    const bodyText = document.body.textContent.toLowerCase();
     let matchCount = 0;
     
     for (const keyword of UNSAFE_KEYWORDS) {
@@ -59,7 +64,11 @@ function scanAndProtect() {
         }
     }
 
-    if (matchCount >= 2) { // Threshold for unsafe content
+    if (strictMode && matchCount > 0) {
+        blurKeywordsInDOM();
+    }
+
+    if (matchCount >= 5) { // Threshold for unsafe content
         console.log("SafeSurf AI: Unsafe content detected!");
         if (strictMode) {
             blurImages();
@@ -88,6 +97,8 @@ function blurImages() {
 function removeProtection() {
     const style = document.getElementById('safesurf-blur-style');
     if (style) style.remove();
+    const keywordStyle = document.getElementById('safesurf-keyword-style');
+    if (keywordStyle) keywordStyle.remove();
     const banner = document.getElementById('safesurf-warning-banner');
     if (banner) banner.remove();
 }
@@ -147,5 +158,90 @@ function showWarningBanner() {
         banner.style.opacity = '0';
         banner.style.transition = 'all 0.3s ease';
         setTimeout(() => banner.remove(), 300);
+    });
+}
+
+function blurKeywordsInDOM() {
+    if (!document.getElementById('safesurf-keyword-style')) {
+        const style = document.createElement('style');
+        style.id = 'safesurf-keyword-style';
+        style.innerHTML = `
+            .safesurf-blurred-word {
+                filter: blur(5px) !important;
+                background-color: rgba(0,0,0,0.8) !important;
+                color: transparent !important;
+                border-radius: 4px !important;
+                display: inline-block !important;
+                user-select: none !important;
+                transition: all 0.3s ease !important;
+                padding: 0 2px !important;
+                margin: 0 1px !important;
+            }
+            .safesurf-blurred-word:hover {
+                filter: blur(0px) !important;
+                background-color: transparent !important;
+                color: inherit !important;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    const regex = new RegExp(`\\b(${UNSAFE_KEYWORDS.join('|')})\\b`, 'gi');
+
+    const walker = document.createTreeWalker(
+        document.body,
+        NodeFilter.SHOW_TEXT,
+        {
+            acceptNode: function(node) {
+                const parent = node.parentNode;
+                if (!parent) return NodeFilter.FILTER_REJECT;
+                const parentName = parent.nodeName.toLowerCase();
+                if (parentName === 'script' || parentName === 'style' || parentName === 'noscript' || parent.classList.contains('safesurf-blurred-word')) {
+                    return NodeFilter.FILTER_REJECT;
+                }
+                regex.lastIndex = 0;
+                if (regex.test(node.nodeValue)) {
+                    return NodeFilter.FILTER_ACCEPT;
+                }
+                return NodeFilter.FILTER_SKIP;
+            }
+        }
+    );
+
+    const nodesToReplace = [];
+    let node;
+    while (node = walker.nextNode()) {
+        nodesToReplace.push(node);
+    }
+
+    if (nodesToReplace.length === 0) return;
+
+    nodesToReplace.forEach(textNode => {
+        const text = textNode.nodeValue;
+        const parent = textNode.parentNode;
+        let lastIndex = 0;
+        const fragment = document.createDocumentFragment();
+        let match;
+        let hasMatches = false;
+        
+        regex.lastIndex = 0;
+        while ((match = regex.exec(text)) !== null) {
+            hasMatches = true;
+            if (match.index > lastIndex) {
+                fragment.appendChild(document.createTextNode(text.substring(lastIndex, match.index)));
+            }
+            const span = document.createElement('span');
+            span.className = 'safesurf-blurred-word';
+            span.textContent = match[0];
+            fragment.appendChild(span);
+            lastIndex = regex.lastIndex;
+        }
+        
+        if (hasMatches) {
+            if (lastIndex < text.length) {
+                fragment.appendChild(document.createTextNode(text.substring(lastIndex)));
+            }
+            parent.replaceChild(fragment, textNode);
+        }
     });
 }

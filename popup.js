@@ -15,13 +15,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event listeners
     mainToggle.addEventListener('change', (e) => {
         const isEnabled = e.target.checked;
-        chrome.storage.local.set({ isEnabled });
+        chrome.storage.local.set({ isEnabled }, reloadActiveTabs);
         updateUI(isEnabled);
     });
 
     strictToggle.addEventListener('change', (e) => {
-        chrome.storage.local.set({ strictMode: e.target.checked });
+        chrome.storage.local.set({ strictMode: e.target.checked }, reloadActiveTabs);
     });
+
+    function reloadActiveTabs() {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs.length > 0) {
+                chrome.tabs.reload(tabs[0].id);
+            }
+        });
+    }
 
     function updateUI(isEnabled) {
         if (isEnabled) {
