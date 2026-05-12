@@ -17,7 +17,14 @@
   "background": {
     "service_worker": "background.js"
   },
+  "icons": {
+    "16": "icons/SafeSurf_Icon.png",
+    "32": "icons/SafeSurf_Icon.png",
+    "48": "icons/SafeSurf_Icon.png",
+    "128": "icons/SafeSurf_Icon.png"
+  },
   "action": {
+    "default_icon": "icons/SafeSurf_Icon.png",
     "default_popup": "popup.html",
     "default_title": "SafeSurf AI"
   },
