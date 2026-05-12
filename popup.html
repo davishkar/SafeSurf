@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeSurf AI</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shield-icon"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <h1>SafeSurf <span>AI</span></h1>
+            </div>
+        </header>
+
+        <div class="status-card" id="status-card">
+            <div class="status-icon" id="status-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            </div>
+            <h2 id="status-title">Protection Active</h2>
+            <p id="status-desc">You are safe from harmful content.</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-item">
+                <div class="control-info">
+                    <h3>SafeSurf Protection</h3>
+                    <p>Block known malicious & adult sites</p>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="main-toggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+
+            <div class="control-item">
+                <div class="control-info">
+                    <h3>Strict Mode</h3>
+                    <p>Auto-blur suspicious images</p>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="strict-toggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </div>
+
+        <footer>
+            Local processing only. 100% Private.
+        </footer>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>
