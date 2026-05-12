@@ -60,5 +60,3 @@ SafeSurf AI V1 is designed from the ground up to respect user privacy:
 - **100% Local:** Every single block, scan, and blur happens entirely on your local machine.
 
 ---
-
-*Powered by SafeSurf AI - Making the internet a safer place for everyone.*

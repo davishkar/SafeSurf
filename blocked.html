@@ -7,10 +7,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0f172a;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent-danger: #ef4444;
+            --bg-deep: #08111f;
+            --bg-mid: #10243a;
+            --glass: rgba(255, 255, 255, 0.12);
+            --glass-line: rgba(255, 255, 255, 0.2);
+            --text-main: #f7fbff;
+            --text-muted: #a9b8c7;
+            --accent-danger: #ff5c7a;
+            --accent-brand: #69a7ff;
         }
 
         * {
@@ -20,98 +24,145 @@
         }
 
         body {
-            background-color: var(--bg-color);
+            min-height: 100vh;
+            padding: 24px;
             color: var(--text-main);
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100vh;
             overflow: hidden;
-            background-image: radial-gradient(circle at 50% 50%, rgba(239, 68, 68, 0.15) 0%, transparent 60%);
+            background:
+                linear-gradient(145deg, rgba(105, 167, 255, 0.16), transparent 42%),
+                radial-gradient(circle at 22% 14%, rgba(255, 92, 122, 0.24), transparent 34%),
+                radial-gradient(circle at 82% 88%, rgba(36, 212, 154, 0.13), transparent 34%),
+                linear-gradient(160deg, var(--bg-mid), var(--bg-deep) 72%);
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 7%;
+            border-radius: 48px;
+            background:
+                linear-gradient(135deg, rgba(255, 255, 255, 0.14), transparent 34%),
+                linear-gradient(315deg, rgba(255, 92, 122, 0.14), transparent 42%);
+            filter: blur(22px);
+            opacity: 0.85;
         }
 
         .container {
+            position: relative;
+            width: min(100%, 580px);
             text-align: center;
-            max-width: 600px;
-            padding: 40px;
-            background: rgba(30, 41, 59, 0.6);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3), 0 0 40px rgba(239, 68, 68, 0.1);
-            animation: fadeIn 0.6s ease-out;
+            padding: 42px 38px 34px;
+            border: 1px solid var(--glass-line);
+            border-radius: 28px;
+            background:
+                linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.08)),
+                var(--glass);
+            backdrop-filter: blur(24px) saturate(160%);
+            box-shadow:
+                0 28px 70px rgba(2, 8, 23, 0.42),
+                inset 0 1px 0 rgba(255, 255, 255, 0.36),
+                inset 0 -20px 38px rgba(7, 18, 31, 0.22),
+                0 0 44px rgba(255, 92, 122, 0.14);
+            animation: fadeIn 0.5s ease-out;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(16px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .icon {
-            width: 80px;
-            height: 80px;
-            background: rgba(239, 68, 68, 0.1);
+            width: 84px;
+            height: 84px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 24px;
             color: var(--accent-danger);
-            box-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+            border: 1px solid rgba(255, 255, 255, 0.24);
+            background:
+                radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.12) 31%, transparent 58%),
+                rgba(255, 255, 255, 0.08);
+            box-shadow:
+                inset 0 2px 5px rgba(255, 255, 255, 0.32),
+                inset 0 -14px 24px rgba(2, 8, 23, 0.3),
+                0 14px 32px rgba(2, 8, 23, 0.32),
+                0 0 30px rgba(255, 92, 122, 0.2);
         }
 
         h1 {
-            font-size: 28px;
+            font-size: clamp(28px, 5vw, 38px);
             font-weight: 800;
             margin-bottom: 12px;
-            letter-spacing: -0.5px;
+            letter-spacing: 0;
+            line-height: 1.08;
         }
 
         p {
+            max-width: 460px;
+            margin: 0 auto 30px;
             font-size: 16px;
             color: var(--text-muted);
-            margin-bottom: 32px;
-            line-height: 1.6;
+            line-height: 1.65;
         }
 
         .btn {
-            display: inline-block;
-            background: var(--text-main);
-            color: var(--bg-color);
-            padding: 14px 28px;
-            border-radius: 12px;
-            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 48px;
+            padding: 0 24px;
+            border-radius: 999px;
+            color: #06111f;
+            font-weight: 700;
             text-decoration: none;
-            transition: all 0.3s ease;
+            background:
+                linear-gradient(180deg, #ffffff, #dcecff);
+            box-shadow:
+                0 12px 28px rgba(2, 8, 23, 0.28),
+                inset 0 1px 1px rgba(255, 255, 255, 0.95),
+                inset 0 -3px 8px rgba(94, 127, 166, 0.26);
+            transition: transform 0.22s ease, box-shadow 0.22s ease;
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(255,255,255,0.2);
+            box-shadow:
+                0 18px 34px rgba(2, 8, 23, 0.32),
+                0 0 24px rgba(105, 167, 255, 0.18),
+                inset 0 1px 1px rgba(255, 255, 255, 0.95);
         }
 
         .branding {
-            margin-top: 32px;
+            margin-top: 28px;
             font-size: 13px;
-            color: var(--text-muted);
+            color: rgba(224, 235, 246, 0.72);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 7px;
         }
-        
+
         .branding svg {
             width: 16px;
             height: 16px;
-            color: #3b82f6;
+            color: var(--accent-brand);
+        }
+
+        @media (max-width: 520px) {
+            body {
+                padding: 16px;
+            }
+
+            .container {
+                padding: 32px 22px 28px;
+                border-radius: 22px;
+            }
         }
     </style>
 </head>
